@@ -53,6 +53,21 @@ def main() -> int:
     destination_dir.mkdir(parents=True, exist_ok=True)
     destination = destination_dir / "entry.txt"
     destination.write_text(POEM, encoding="utf-8")
+
+    # Verify what was actually written: the grader keeps only the
+    # output file, so a silent short write or encoding slip would
+    # ship a wrong poem while still exiting 0. Read it back and
+    # fail loudly if it is not byte-for-byte the poem we meant.
+    written = destination.read_text(encoding="utf-8")
+    if written != POEM:
+        print("entry.txt does not match the poem, refusing to pass",
+              file=sys.stderr)
+        return 1
+    if not (1 <= len(written) <= 280) or not written.strip():
+        print("entry.txt failed its length check after write",
+              file=sys.stderr)
+        return 1
+
     print(f"wrote {destination} ({points} code points)")
     return 0
 
